@@ -1,6 +1,6 @@
 {
-  "name": "mh-solver",
-  "version": "1.0.0",
+  "name": "mhsolver",
+  "version": "0.0.1",
   "description": "Automated minigame solver",
   "main": "main.js",
   "scripts": {
@@ -14,11 +14,11 @@
     "minigame",
     "solver"
   ],
-  "author": "Your Name",
+  "author": "MH0590",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MH0590/mh-solver.git"
+    "url": "https://github.com/MH0590/MHSolver.git"
   },
   "devDependencies": {
     "electron": "^28.0.0",
@@ -37,7 +37,7 @@
       {
         "provider": "github",
         "owner": "MH0590",
-        "repo": "mh-solver"
+        "repo": "MHSolver"
       }
     ],
     "win": {
