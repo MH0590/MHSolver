@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MH Solver</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="view active">
+      <div class="container">
+        <header>
+          <h1>PC Automation Hub</h1>
+          <p class="subtitle">Background automation tools</p>
+        </header>
+
+        <div class="programs-grid">
+          <div class="program-card" data-program="minigame">
+            <div class="program-icon gradient-blue">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+              </svg>
+            </div>
+            <h3>Minigame Solver</h3>
+            <p>Automatically solve 3x3 letter grids - presses keys in grid order (left-to-right)</p>
+            <div class="program-launch">
+              Configure <span class="arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minigame View -->
+    <div id="minigame-view" class="view">
+      <div class="container">
+        <!-- Header -->
+        <div class="view-header">
+          <div>
+            <button id="back-btn" class="back-button">← Back to Dashboard</button>
+            <div class="view-title">
+              <h1>Minigame Solver</h1>
+              <span class="stealth-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+                Stealth Mode
+              </span>
+              <span id="version-badge" class="stealth-badge" style="background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
+                v1.0.0
+              </span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <!-- Update Button (hidden by default) -->
+            <button id="update-btn" class="icon-button" style="display: none; background: rgba(34, 197, 94, 0.2); border-color: rgba(34, 197, 94, 0.3);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/>
+              </svg>
+              <span id="update-text" style="margin-left: 0.5rem; color: #4ade80;">Update Available</span>
+            </button>
+            
+            <!-- Settings Button -->
+            <button id="settings-btn" class="icon-button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel">
+          <h3>Configuration</h3>
+          <div class="settings-content">
+            <div class="setting-group">
+              <label>Screen Resolution</label>
+              <select id="resolution-select">
+                <option value="1920x1080">1920x1080 (Full HD)</option>
+                <option value="2560x1440">2560x1440 (2K)</option>
+              </select>
+              <small>Select your monitor resolution</small>
+            </div>
+
+            <div class="setting-group">
+              <label>Activation Hotkey</label>
+              <input type="text" id="hotkey-input" placeholder="e.g., F1, F2" maxlength="3">
+              <small>Press this key in-game to activate</small>
+            </div>
+
+            <div class="setting-group">
+              <label>Horizontal Position: <span id="offsetx-value">0</span>px</label>
+              <input type="range" id="offsetx-slider" min="-300" max="300" value="0">
+              <small>Adjust left/right (negative = left, positive = right)</small>
+            </div>
+
+            <div class="setting-group">
+              <label>Vertical Position: <span id="offsety-value">0</span>px</label>
+              <input type="range" id="offsety-slider" min="-300" max="300" value="0">
+              <small>Adjust up/down (negative = up, positive = down)</small>
+            </div>
+
+            <div class="setting-group">
+              <label>Base Delay Between Keys: <span id="delay-value">150</span>ms</label>
+              <input type="range" id="delay-slider" min="100" max="300" value="150">
+              <small>Lower = faster execution</small>
+            </div>
+
+            <div class="setting-group">
+              <label>Random Variance: ±<span id="variance-value">50</span>ms</label>
+              <input type="range" id="variance-slider" min="0" max="100" value="50">
+              <small>Higher = more human-like variation</small>
+            </div>
+
+            <div class="setting-group">
+              <div class="stealth-toggle">
+                <div>
+                  <strong>Stealth Mode</strong>
+                  <small>No visible overlay during gameplay</small>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="stealth-checkbox" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="execution-estimate">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              <div>
+                <strong>Estimated Execution Time</strong>
+                <div class="estimate-time" id="estimated-time">2.30s</div>
+                <small id="estimate-status">✓ Within 3 second requirement</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <div class="status-left">
+            <div class="status-indicator" id="status-indicator"></div>
+            <span id="status-message">Ready - Press hotkey to start</span>
+            <span id="execution-time" class="execution-time"></span>
+          </div>
+          <div class="hotkey-display">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>
+            </svg>
+            <span>Press <strong id="hotkey-display">F1</strong></span>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+          <!-- Grid Visualization -->
+          <div class="card">
+            <h3>Detection Preview</h3>
+            <div id="grid-container" class="grid-container">
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+              <div class="grid-cell">?</div>
+            </div>
+            <div id="stealth-overlay" class="stealth-overlay">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+              <p>Hidden in stealth mode</p>
+              <small>No overlay visible during gameplay</small>
+            </div>
+          </div>
+
+          <!-- Instructions & Info -->
+          <div class="info-column">
+            <div class="card">
+              <h3>How It Works</h3>
+              <div class="steps">
+                <div class="step">
+                  <div class="step-number">1</div>
+                  <div>
+                    <strong>Screen Detection:</strong>
+                    <span>Captures each cell individually (~500ms)</span>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-number">2</div>
+                  <div>
+                    <strong>Letter Recognition:</strong>
+                    <span>Identifies letters Q, W, E, R, A, S, D</span>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-number">3</div>
+                  <div>
+                    <strong>Key Sequence:</strong>
+                    <span>Presses keys left-to-right, top-to-bottom</span>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-number">4</div>
+                  <div>
+                    <strong>100% Accuracy:</strong>
+                    <span>Never misses - completes in under 3s</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-box info-purple">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <div>
+                <strong>Stealth Features:</strong>
+                <ul>
+                  <li>No visible overlay in-game</li>
+                  <li>Background process only</li>
+                  <li>Random human-like delays</li>
+                  <li>No memory injection</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
