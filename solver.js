@@ -23,16 +23,16 @@ const VALID_LETTERS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D'];
 // Resolution-specific configs
 const RESOLUTION_CONFIGS = {
   '1920x1080': {
-    cellSize: 62,
-    cellSpacing: 64,
-    offsetX: -310,
-    offsetY: -120
+    cellSize: 90,       // Larger cells for 1920x1080
+    cellSpacing: 95,    // Spacing between cell centers
+    offsetX: -108,      // Adjusted to center on top-left cell
+    offsetY: -88        // Adjusted to center on top-left cell
   },
   '2560x1440': {
-    cellSize: 83,      // 62 × 1.333
-    cellSpacing: 85,   // 64 × 1.333
-    offsetX: -413,     // -310 × 1.333
-    offsetY: -160      // -120 × 1.333
+    cellSize: 120,      // 90 × 1.333 (scaled up)
+    cellSpacing: 127,   // 95 × 1.333 (scaled up)
+    offsetX: -144,      // -108 × 1.333 (scaled up)
+    offsetY: -117       // -88 × 1.333 (scaled up)
   }
 };
 
