@@ -46,6 +46,10 @@ const updateBtn = document.getElementById('update-btn');
 const updateText = document.getElementById('update-text');
 const versionBadge = document.getElementById('version-badge');
 
+// Debug elements
+const openDebugBtn = document.getElementById('open-debug-btn');
+const debugPath = document.getElementById('debug-path');
+
 // Initialize
 async function init() {
   // Load config
@@ -70,6 +74,10 @@ async function init() {
   // Load app version
   const version = await window.electronAPI.getAppVersion();
   versionBadge.textContent = `v${version}`;
+  
+  // Load debug folder path
+  const debugFolder = await window.electronAPI.getDebugFolder();
+  debugPath.textContent = `Location: ${debugFolder}`;
   
   // Setup event listeners
   setupEventListeners();
@@ -153,6 +161,11 @@ function setupEventListeners() {
   stealthCheckbox.addEventListener('change', () => {
     isStealthMode = stealthCheckbox.checked;
     updateStealthMode();
+  });
+  
+  // Debug folder button
+  openDebugBtn.addEventListener('click', async () => {
+    await window.electronAPI.openDebugFolder();
   });
 }
 

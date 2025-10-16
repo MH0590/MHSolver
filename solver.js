@@ -3,8 +3,20 @@ const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
 const { exec } = require('child_process');
 const util = require('util');
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
 
 const execPromise = util.promisify(exec);
+
+// Get user's Documents folder for saving debug images
+const DEBUG_FOLDER = path.join(os.homedir(), 'Documents', 'MHSolver_Debug');
+
+// Create debug folder if it doesn't exist
+if (!fs.existsSync(DEBUG_FOLDER)) {
+  fs.mkdirSync(DEBUG_FOLDER, { recursive: true });
+  console.log(`Created debug folder: ${DEBUG_FOLDER}`);
+}
 
 const VALID_LETTERS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D'];
 
@@ -439,9 +451,9 @@ async function detectLetters(fullScreenshot) {
       // Capture this specific cell
       const cellBuffer = await captureSingleCell(row, col, fullScreenshot, topLeftPos);
       
-      // Save debug image for this cell
-      await sharp(cellBuffer)
-        .toFile(`debug_cell_${row}_${col}.png`);
+      // Save debug image for this cell in user's Documents folder
+      const cellDebugPath = path.join(DEBUG_FOLDER, `debug_cell_${row}_${col}.png`);
+      await sharp(cellBuffer).toFile(cellDebugPath);
       
       // Detect letter in this cell
       const letter = await detectCellLetter(cellBuffer, row, col);
@@ -455,6 +467,7 @@ async function detectLetters(fullScreenshot) {
     const gridSize = cellSpacing * 2 + cellSize;
     
     // Create visual grid showing all 9 cells
+    const gridDebugPath = path.join(DEBUG_FOLDER, 'debug_capture.png');
     await sharp(fullScreenshot)
       .extract({
         left: topLeftPos.x - 10,
@@ -462,9 +475,9 @@ async function detectLetters(fullScreenshot) {
         width: gridSize + 20,
         height: gridSize + 20
       })
-      .toFile('debug_capture.png');
+      .toFile(gridDebugPath);
     
-    console.log('\n✓ Debug images saved to C:\\MHSolver\\');
+    console.log(`\n✓ Debug images saved to: ${DEBUG_FOLDER}`);
     console.log('  - debug_capture.png (full grid)');
     console.log('  - debug_cell_X_Y.png (individual cells)');
   } catch (err) {
@@ -565,6 +578,11 @@ function updateConfig(newConfig) {
   }
 }
 
+// Get debug folder path
+function getDebugFolder() {
+  return DEBUG_FOLDER;
+}
+
 module.exports = {
   captureScreen,
   detectLetters,
@@ -572,5 +590,6 @@ module.exports = {
   validateMinigamePresent,
   stop,
   getConfig,
-  updateConfig
+  updateConfig,
+  getDebugFolder
 };

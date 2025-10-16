@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, shell } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const solver = require('./solver');
@@ -250,6 +250,16 @@ ipcMain.handle('start-solver', async () => {
 
 ipcMain.handle('stop-solver', async () => {
   stopSolver();
+});
+
+// Debug folder handlers
+ipcMain.handle('get-debug-folder', () => {
+  return solver.getDebugFolder();
+});
+
+ipcMain.handle('open-debug-folder', async () => {
+  const debugFolder = solver.getDebugFolder();
+  await shell.openPath(debugFolder);
 });
 
 // App lifecycle

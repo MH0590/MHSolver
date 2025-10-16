@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startSolver: () => ipcRenderer.invoke('start-solver'),
   stopSolver: () => ipcRenderer.invoke('stop-solver'),
   
+  // Debug folder
+  getDebugFolder: () => ipcRenderer.invoke('get-debug-folder'),
+  openDebugFolder: () => ipcRenderer.invoke('open-debug-folder'),
+  
   // Auto-update methods
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
