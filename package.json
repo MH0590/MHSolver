@@ -1,6 +1,6 @@
 {
   "name": "mhsolver",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Automated minigame solver",
   "main": "main.js",
   "scripts": {
@@ -33,6 +33,9 @@
   "build": {
     "appId": "com.mhsolver.app",
     "productName": "MH Solver",
+    "asarUnpack": [
+    "node_modules/screenshot-desktop/**/*"
+  ],
     "publish": [
       {
         "provider": "github",
