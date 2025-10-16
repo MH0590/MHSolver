@@ -168,9 +168,9 @@ async function startSolver() {
     mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Checking for minigame...' });
     const isMinigamePresent = await solver.validateMinigamePresent(screenshot);
     
-    if (!isMinigamePresent) {
-      throw new Error('Minigame not detected on screen. Make sure the alphabet grid is visible and centered.');
-    }
+    //if (!isMinigamePresent) {
+    //  throw new Error('Minigame not detected on screen. Make sure the alphabet grid is visible and centered.');
+    //}
 
     // Step 2: Detect letters
     mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Detecting letters...' });
