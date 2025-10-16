@@ -23,13 +23,13 @@ const VALID_LETTERS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D'];
 // Resolution-specific configs
 const RESOLUTION_CONFIGS = {
   '1920x1080': {
-    cellSize: 90,       // Larger cells for 1920x1080
+    cellSize: 100,      // Increased from 90 to capture more of the letter
     cellSpacing: 95,    // Spacing between cell centers
     offsetX: -108,      // Adjusted to center on top-left cell
     offsetY: -88        // Adjusted to center on top-left cell
   },
   '2560x1440': {
-    cellSize: 120,      // 90 × 1.333 (scaled up)
+    cellSize: 133,      // 100 × 1.333 (scaled up)
     cellSpacing: 127,   // 95 × 1.333 (scaled up)
     offsetX: -144,      // -108 × 1.333 (scaled up)
     offsetY: -117       // -88 × 1.333 (scaled up)
