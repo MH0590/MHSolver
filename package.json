@@ -1,64 +1,33 @@
 {
   "name": "mhsolver",
-  "version": "0.1.1",
-  "description": "Automated minigame solver",
+  "version": "0.1.2",
+  "description": "Fast minigame solver using template matching",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "build:win": "electron-builder --win",
     "publish": "electron-builder --publish always"
   },
   "keywords": [
-    "automation",
     "minigame",
-    "solver"
+    "solver",
+    "automation"
   ],
   "author": "MH0590",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MH0590/MHSolver.git"
-  },
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
   },
   "dependencies": {
-    "electron-updater": "^6.6.2",
     "screenshot-desktop": "^1.15.0",
-    "sharp": "^0.33.2",
-    "tesseract.js": "^5.0.4"
+    "sharp": "^0.33.5"
   },
   "build": {
-    "appId": "com.mhsolver.app",
+    "appId": "com.mh.solver",
     "productName": "MH Solver",
-    "asarUnpack": [
-    "node_modules/screenshot-desktop/**/*"
-  ],
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "MH0590",
-        "repo": "MHSolver"
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "build/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+    "directories": {
+      "output": "dist"
     },
     "files": [
       "**/*",
@@ -72,7 +41,41 @@
       "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
       "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
-    ]
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
+      "letter_templates/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "letter_templates",
+        "to": "letter_templates",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "MH0590",
+      "repo": "MHSolver"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MH0590/MHSolver.git"
   }
 }

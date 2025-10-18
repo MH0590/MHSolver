@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startSolver: () => ipcRenderer.invoke('start-solver'),
   stopSolver: () => ipcRenderer.invoke('stop-solver'),
   
+  // Templates
+  getTemplatesStatus: () => ipcRenderer.invoke('get-templates-status'),
+  openTemplatesFolder: () => ipcRenderer.invoke('open-templates-folder'),
+  
   // Debug folder
   getDebugFolder: () => ipcRenderer.invoke('get-debug-folder'),
   openDebugFolder: () => ipcRenderer.invoke('open-debug-folder'),
@@ -35,5 +39,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onUpdateStatus: (callback) => {
     ipcRenderer.on('update-status', (event, data) => callback(data));
+  },
+  onTemplateStatus: (callback) => {
+    ipcRenderer.on('template-status', (event, data) => callback(data));
   }
 });

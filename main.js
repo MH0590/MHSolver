@@ -5,9 +5,10 @@ const solver = require('./solver');
 
 let mainWindow;
 let isDetecting = false;
+let templatesLoaded = false;
 
 // Auto-updater configuration
-autoUpdater.autoDownload = false; // Don't auto-download, let user decide
+autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
 function createWindow() {
@@ -28,20 +29,23 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Open DevTools in development
-  // mainWindow.webContents.openDevTools();
-
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
   
   // Check for updates after window loads
   mainWindow.webContents.once('did-finish-load', () => {
+    // Send template status to UI
+    mainWindow.webContents.send('template-status', { 
+      loaded: templatesLoaded,
+      count: templatesLoaded ? 7 : 0 
+    });
+    
     // Only check for updates in production
     if (!process.env.DEBUG) {
       setTimeout(() => {
         autoUpdater.checkForUpdates();
-      }, 3000); // Check 3 seconds after launch
+      }, 3000);
     }
   });
 }
@@ -133,10 +137,8 @@ ipcMain.handle('get-app-version', () => {
 // ============ SOLVER FUNCTIONALITY ============
 // Register global hotkey
 function registerHotkey(hotkey) {
-  // Unregister previous hotkey
   globalShortcut.unregisterAll();
   
-  // Register new hotkey
   const success = globalShortcut.register(hotkey, () => {
     if (!isDetecting) {
       startSolver();
@@ -156,57 +158,42 @@ function registerHotkey(hotkey) {
 async function startSolver() {
   if (isDetecting) return;
   
+  // Check if templates are loaded
+  if (!templatesLoaded) {
+    mainWindow.webContents.send('solver-status', { 
+      status: 'error', 
+      message: 'Templates not loaded! Check setup instructions.' 
+    });
+    return;
+  }
+  
   isDetecting = true;
-  mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Scanning screen...' });
+  mainWindow.webContents.send('solver-status', { 
+    status: 'detecting', 
+    message: 'Starting fast solver...' 
+  });
 
   try {
-    // Step 1: Capture screen
-    mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Capturing screen...' });
-    const screenshot = await solver.captureScreen();
-
-    // Step 1.5: Validate minigame is present
-    mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Checking for minigame...' });
-    const isMinigamePresent = await solver.validateMinigamePresent(screenshot);
+    const startTime = Date.now();
     
-    //if (!isMinigamePresent) {
-    //  throw new Error('Minigame not detected on screen. Make sure the alphabet grid is visible and centered.');
-    //}
-
-    // Step 2: Detect letters
-    mainWindow.webContents.send('solver-status', { status: 'detecting', message: 'Detecting letters...' });
-    const letters = await solver.detectLetters(screenshot);
+    // Use the new fast solver
+    const result = await solver.solveMinigameFast();
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Solver failed');
+    }
     
     // Send detected grid to UI
+    const letters = [];
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        letters.push(result.grid[row][col]);
+      }
+    }
     mainWindow.webContents.send('grid-detected', { letters });
-
-    // Step 3: Validate detection
-    const unknownCount = letters.filter(l => l === '?').length;
-    if (unknownCount > 5) {
-      throw new Error(`Too many undetected letters (${unknownCount}/9). Try adjusting capture size or positioning minigame in center.`);
-    }
-    
-    if (unknownCount > 0) {
-      mainWindow.webContents.send('solver-status', { 
-        status: 'detecting', 
-        message: `Warning: ${unknownCount} letters unclear, will skip those positions` 
-      });
-    }
-
-    mainWindow.webContents.send('solver-status', { 
-      status: 'executing', 
-      message: 'Executing key sequence...' 
-    });
-
-    // Step 4: Execute key sequence
-    const startTime = Date.now();
-    await solver.executeKeySequence(letters, (index) => {
-      // Update UI with current position
-      mainWindow.webContents.send('key-pressed', { index, letter: letters[index] });
-    });
     
     const executionTime = ((Date.now() - startTime) / 1000).toFixed(2);
-
-    // Step 5: Complete
+    
     mainWindow.webContents.send('solver-status', { 
       status: 'complete', 
       message: `Complete in ${executionTime}s`,
@@ -226,8 +213,11 @@ async function startSolver() {
 
 function stopSolver() {
   isDetecting = false;
-  solver.stop();
-  mainWindow.webContents.send('solver-status', { status: 'stopped', message: 'Stopped' });
+  solver.stopSolver();
+  mainWindow.webContents.send('solver-status', { 
+    status: 'stopped', 
+    message: 'Stopped' 
+  });
 }
 
 // IPC Handlers
@@ -252,19 +242,42 @@ ipcMain.handle('stop-solver', async () => {
   stopSolver();
 });
 
+ipcMain.handle('get-templates-status', async () => {
+  return { loaded: templatesLoaded, count: templatesLoaded ? 7 : 0 };
+});
+
 // Debug folder handlers
 ipcMain.handle('get-debug-folder', () => {
-  return solver.getDebugFolder();
+  return solver.getDebugFolder ? solver.getDebugFolder() : path.join(require('os').homedir(), 'Documents', 'MHSolver_Debug');
 });
 
 ipcMain.handle('open-debug-folder', async () => {
-  const debugFolder = solver.getDebugFolder();
+  const debugFolder = solver.getDebugFolder ? solver.getDebugFolder() : path.join(require('os').homedir(), 'Documents', 'MHSolver_Debug');
   await shell.openPath(debugFolder);
 });
 
+ipcMain.handle('open-templates-folder', async () => {
+  const templatesFolder = path.join(__dirname, 'letter_templates');
+  await shell.openPath(templatesFolder);
+});
+
 // App lifecycle
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createWindow();
+  
+  // Load templates on startup
+  console.log('🚀 MH Solver starting...');
+  console.log('📂 Loading letter templates...');
+  
+  templatesLoaded = await solver.loadTemplates();
+  
+  if (!templatesLoaded) {
+    console.log('⚠️  WARNING: Templates not loaded!');
+    console.log('📁 Please add 7 letter images (Q.png, W.png, E.png, R.png, A.png, S.png, D.png)');
+    console.log(`📂 To folder: ${path.join(__dirname, 'letter_templates')}`);
+  } else {
+    console.log('✅ Templates loaded successfully!');
+  }
   
   // Register default hotkey (F1)
   registerHotkey('F1');

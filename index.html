@@ -53,6 +53,9 @@
               <span id="version-badge" class="stealth-badge" style="background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.3); color: #60a5fa;">
                 v1.0.0
               </span>
+              <span id="template-badge" class="stealth-badge" style="background: rgba(234, 179, 8, 0.2); border-color: rgba(234, 179, 8, 0.3); color: #facc15;">
+                ⚠ Templates Missing
+              </span>
             </div>
           </div>
           <div style="display: flex; gap: 0.5rem;">
@@ -94,26 +97,26 @@
             </div>
 
             <div class="setting-group">
-              <label>Horizontal Position: <span id="offsetx-value">0</span>px</label>
-              <input type="range" id="offsetx-slider" min="-300" max="300" value="0">
+              <label>Horizontal Position: <span id="offsetx-value">-118</span>px</label>
+              <input type="range" id="offsetx-slider" min="-300" max="300" value="-118">
               <small>Adjust left/right (negative = left, positive = right)</small>
             </div>
 
             <div class="setting-group">
-              <label>Vertical Position: <span id="offsety-value">0</span>px</label>
-              <input type="range" id="offsety-slider" min="-300" max="300" value="0">
+              <label>Vertical Position: <span id="offsety-value">-45</span>px</label>
+              <input type="range" id="offsety-slider" min="-300" max="300" value="-45">
               <small>Adjust up/down (negative = up, positive = down)</small>
             </div>
 
             <div class="setting-group">
-              <label>Base Delay Between Keys: <span id="delay-value">150</span>ms</label>
-              <input type="range" id="delay-slider" min="100" max="300" value="150">
-              <small>Lower = faster execution</small>
+              <label>Key Press Delay: <span id="delay-value">15</span>ms</label>
+              <input type="range" id="delay-slider" min="10" max="100" value="15">
+              <small>Lower = faster execution (15ms recommended)</small>
             </div>
 
             <div class="setting-group">
-              <label>Random Variance: ±<span id="variance-value">50</span>ms</label>
-              <input type="range" id="variance-slider" min="0" max="100" value="50">
+              <label>Random Variance: ±<span id="variance-value">5</span>ms</label>
+              <input type="range" id="variance-slider" min="0" max="50" value="5">
               <small>Higher = more human-like variation</small>
             </div>
 
@@ -136,7 +139,7 @@
               </svg>
               <div>
                 <strong>Estimated Execution Time</strong>
-                <div class="estimate-time" id="estimated-time">2.30s</div>
+                <div class="estimate-time" id="estimated-time">1.14s</div>
                 <small id="estimate-status">✓ Within 3 second requirement</small>
               </div>
             </div>
@@ -187,35 +190,56 @@
 
           <!-- Instructions & Info -->
           <div class="info-column">
+            <!-- Template Setup Warning -->
+            <div id="template-status" class="info-box" style="display: none; background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #facc15;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <div>
+                <strong style="color: #facc15;">Templates Not Found!</strong>
+                <p style="color: #fbbf24; margin-top: 0.5rem; font-size: 0.875rem;">
+                  The solver needs 7 letter templates to work. Save the letter images (Q.png, W.png, E.png, R.png, A.png, S.png, D.png) in the templates folder.
+                </p>
+                <button id="open-templates-btn" class="icon-button" style="margin-top: 0.5rem; width: 100%; background: rgba(234, 179, 8, 0.2); border-color: rgba(234, 179, 8, 0.3); justify-content: center;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span style="margin-left: 0.5rem; color: #facc15;">Open Templates Folder</span>
+                </button>
+              </div>
+            </div>
+
             <div class="card">
               <h3>How It Works</h3>
               <div class="steps">
                 <div class="step">
                   <div class="step-number">1</div>
                   <div>
-                    <strong>Screen Detection:</strong>
-                    <span>Captures each cell individually (~500ms)</span>
+                    <strong>Template Matching:</strong>
+                    <span>Compares each cell against saved templates (~0.5s)</span>
                   </div>
                 </div>
                 <div class="step">
                   <div class="step-number">2</div>
                   <div>
-                    <strong>Letter Recognition:</strong>
-                    <span>Identifies letters Q, W, E, R, A, S, D</span>
+                    <strong>Fast Recognition:</strong>
+                    <span>All 9 cells processed in parallel</span>
                   </div>
                 </div>
                 <div class="step">
                   <div class="step-number">3</div>
                   <div>
-                    <strong>Key Sequence:</strong>
-                    <span>Presses keys left-to-right, top-to-bottom</span>
+                    <strong>Rapid Execution:</strong>
+                    <span>Presses keys left-to-right with 15ms delay</span>
                   </div>
                 </div>
                 <div class="step">
                   <div class="step-number">4</div>
                   <div>
-                    <strong>100% Accuracy:</strong>
-                    <span>Never misses - completes in under 3s</span>
+                    <strong>Under 2 Seconds:</strong>
+                    <span>Complete solve in 1.5-2.5s total ⚡</span>
                   </div>
                 </div>
               </div>

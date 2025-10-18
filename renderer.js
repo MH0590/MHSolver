@@ -1,10 +1,11 @@
 // UI State
 let currentView = 'dashboard';
 let isStealthMode = true;
+let templatesLoaded = false;
 let config = {
   hotkey: 'F1',
-  baseDelay: 150,
-  delayVariance: 50
+  baseDelay: 15,  // Much faster with template matching
+  delayVariance: 5
 };
 
 // DOM Elements
@@ -50,6 +51,11 @@ const versionBadge = document.getElementById('version-badge');
 const openDebugBtn = document.getElementById('open-debug-btn');
 const debugPath = document.getElementById('debug-path');
 
+// Template elements
+const templateStatus = document.getElementById('template-status');
+const templateBadge = document.getElementById('template-badge');
+const openTemplatesBtn = document.getElementById('open-templates-btn');
+
 // Initialize
 async function init() {
   // Load config
@@ -60,14 +66,14 @@ async function init() {
   resolutionSelect.value = config.resolution || '1920x1080';
   hotkeyInput.value = config.hotkey;
   hotkeyDisplay.textContent = config.hotkey;
-  delaySlider.value = config.baseDelay;
-  delayValue.textContent = config.baseDelay;
-  varianceSlider.value = config.delayVariance;
-  varianceValue.textContent = config.delayVariance;
-  offsetXSlider.value = config.offsetX || 0;
-  offsetXValue.textContent = config.offsetX || 0;
-  offsetYSlider.value = config.offsetY || 0;
-  offsetYValue.textContent = config.offsetY || 0;
+  delaySlider.value = config.keyDelay || 15;
+  delayValue.textContent = config.keyDelay || 15;
+  varianceSlider.value = config.delayVariance || 5;
+  varianceValue.textContent = config.delayVariance || 5;
+  offsetXSlider.value = config.offsetX || -118;
+  offsetXValue.textContent = config.offsetX || -118;
+  offsetYSlider.value = config.offsetY || -45;
+  offsetYValue.textContent = config.offsetY || -45;
   
   updateEstimatedTime();
   
@@ -86,6 +92,7 @@ async function init() {
   window.electronAPI.onSolverStatus(handleSolverStatus);
   window.electronAPI.onGridDetected(handleGridDetected);
   window.electronAPI.onKeyPressed(handleKeyPressed);
+  window.electronAPI.onTemplateStatus(handleTemplateStatus);
   
   // Listen to update events
   window.electronAPI.onUpdateStatus(handleUpdateStatus);
@@ -143,8 +150,8 @@ function setupEventListeners() {
   delaySlider.addEventListener('input', async () => {
     const value = parseInt(delaySlider.value);
     delayValue.textContent = value;
-    config.baseDelay = value;
-    await window.electronAPI.updateConfig({ baseDelay: value });
+    config.keyDelay = value;
+    await window.electronAPI.updateConfig({ keyDelay: value });
     updateEstimatedTime();
   });
   
@@ -167,6 +174,13 @@ function setupEventListeners() {
   openDebugBtn.addEventListener('click', async () => {
     await window.electronAPI.openDebugFolder();
   });
+  
+  // Templates folder button
+  if (openTemplatesBtn) {
+    openTemplatesBtn.addEventListener('click', async () => {
+      await window.electronAPI.openTemplatesFolder();
+    });
+  }
 }
 
 function switchView(view) {
@@ -182,7 +196,8 @@ function switchView(view) {
 }
 
 function updateEstimatedTime() {
-  const estimatedMs = (config.baseDelay * 9) + 500;
+  const keyDelay = config.keyDelay || 15;
+  const estimatedMs = (keyDelay * 9) + 1000; // 1s for detection
   const estimatedSeconds = (estimatedMs / 1000).toFixed(2);
   
   estimatedTime.textContent = `${estimatedSeconds}s`;
@@ -263,6 +278,29 @@ function handleKeyPressed(data) {
   }
 }
 
+function handleTemplateStatus(data) {
+  const { loaded, count } = data;
+  templatesLoaded = loaded;
+  
+  if (templateBadge) {
+    if (loaded) {
+      templateBadge.textContent = `✓ ${count}/7 Templates`;
+      templateBadge.style.background = 'rgba(34, 197, 94, 0.2)';
+      templateBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+      templateBadge.style.color = '#4ade80';
+    } else {
+      templateBadge.textContent = `⚠ Templates Missing`;
+      templateBadge.style.background = 'rgba(234, 179, 8, 0.2)';
+      templateBadge.style.borderColor = 'rgba(234, 179, 8, 0.3)';
+      templateBadge.style.color = '#facc15';
+    }
+  }
+  
+  if (templateStatus && !loaded) {
+    templateStatus.style.display = 'block';
+  }
+}
+
 function resetGrid() {
   gridCells.forEach(cell => {
     cell.textContent = '?';
@@ -274,56 +312,44 @@ function resetGrid() {
 function handleUpdateStatus(data) {
   const { status, version, percent, message } = data;
   
-  console.log('Update status:', status, version, percent);
-  
   if (status === 'checking') {
-    // Don't show anything while checking
     updateBtn.style.display = 'none';
   } 
   else if (status === 'available') {
-    // Show update available button
     updateBtn.style.display = 'flex';
     updateBtn.style.background = 'rgba(34, 197, 94, 0.2)';
     updateBtn.style.borderColor = 'rgba(34, 197, 94, 0.3)';
     updateText.textContent = `Update to v${version}`;
     updateText.style.color = '#4ade80';
     
-    // Click to download
     updateBtn.onclick = async () => {
-      console.log('Starting download...');
       updateText.textContent = 'Downloading...';
       await window.electronAPI.downloadUpdate();
     };
   } 
   else if (status === 'downloading') {
-    // Show download progress
     updateBtn.style.display = 'flex';
     updateBtn.style.background = 'rgba(59, 130, 246, 0.2)';
     updateBtn.style.borderColor = 'rgba(59, 130, 246, 0.3)';
     updateText.textContent = `Downloading ${Math.round(percent)}%`;
     updateText.style.color = '#60a5fa';
-    updateBtn.onclick = null; // Disable clicking during download
+    updateBtn.onclick = null;
   } 
   else if (status === 'ready') {
-    // Ready to install
     updateBtn.style.display = 'flex';
     updateBtn.style.background = 'rgba(168, 85, 247, 0.2)';
     updateBtn.style.borderColor = 'rgba(168, 85, 247, 0.3)';
     updateText.textContent = 'Install & Restart';
     updateText.style.color = '#c084fc';
     
-    // Click to install
     updateBtn.onclick = () => {
-      console.log('Installing update...');
       window.electronAPI.installUpdate();
     };
   } 
   else if (status === 'not-available') {
-    // No updates, hide button
     updateBtn.style.display = 'none';
   } 
   else if (status === 'error') {
-    // Error checking/downloading
     console.error('Update error:', message);
     updateBtn.style.display = 'none';
   }
