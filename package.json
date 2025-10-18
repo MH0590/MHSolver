@@ -1,6 +1,6 @@
 {
   "name": "mhsolver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Automated minigame solver",
   "main": "main.js",
   "scripts": {
